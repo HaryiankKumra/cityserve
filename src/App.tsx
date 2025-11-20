@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import ComplaintForm from "./pages/ComplaintForm";
 import MyComplaints from "./pages/MyComplaints";
 import AdminDashboard from "./pages/AdminDashboard";
+import TrackComplaint from "./pages/TrackComplaint";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,7 +27,7 @@ const App = () => (
             <Route path="/submit" element={<ComplaintForm />} />
             <Route path="/my-complaints" element={<MyComplaints />} />
             <Route path="/admin" element={<AdminDashboard />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/track" element={<TrackComplaint />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
