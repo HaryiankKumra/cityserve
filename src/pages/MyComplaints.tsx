@@ -131,7 +131,11 @@ export default function MyComplaints() {
                         {format(new Date(complaint.created_at), "MMM d, yyyy")}
                       </p>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigate(`/complaint/${complaint.id}`)}
+                    >
                       View Details
                       <ExternalLink className="w-4 h-4 ml-2" />
                     </Button>
