@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, MapPin, Calendar, User, Package } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, User, Package, Building2 } from "lucide-react";
 import { format } from "date-fns";
 
 interface Complaint {
@@ -21,7 +21,7 @@ interface Complaint {
   longitude: number | null;
   address: string | null;
   assigned_department_id: string | null;
-  departments?: { name: string; contact_phone: string };
+  departments?: { name: string; contact_phone: string; contact_email: string };
 }
 
 interface Attachment {
@@ -51,7 +51,7 @@ export default function ComplaintDetails() {
   const fetchComplaintDetails = async () => {
     const { data: complaintData, error } = await supabase
       .from("complaints")
-      .select("*, departments(name, contact_phone)")
+      .select("*, departments(name, contact_phone, contact_email)")
       .eq("id", id)
       .maybeSingle();
 
@@ -181,11 +181,21 @@ export default function ComplaintDetails() {
 
                 {complaint.departments && (
                   <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
-                    <p className="text-sm font-semibold text-primary mb-2">Assigned Department</p>
-                    <p className="text-sm font-medium">{complaint.departments.name}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Contact: {complaint.departments.contact_phone}
-                    </p>
+                    <div className="flex items-start gap-2 mb-2">
+                      <Building2 className="w-4 h-4 text-primary mt-0.5" />
+                      <p className="text-sm font-semibold text-primary">Assigned Department</p>
+                    </div>
+                    <p className="text-sm font-medium mb-2">{complaint.departments.name}</p>
+                    {complaint.departments.contact_phone && (
+                      <p className="text-xs text-muted-foreground">
+                        Phone: {complaint.departments.contact_phone}
+                      </p>
+                    )}
+                    {complaint.departments.contact_email && (
+                      <p className="text-xs text-muted-foreground">
+                        Email: {complaint.departments.contact_email}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
