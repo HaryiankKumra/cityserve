@@ -45,8 +45,13 @@ export default function ComplaintForm() {
     e.preventDefault();
     if (!user || formData.description.length < 50) return toast.error("Please complete all fields");
     setLoading(true);
-    const { data: complaint } = await supabase.from("complaints" as any).insert([{ ...formData, reporter_id: user.id, latitude: location?.lat, longitude: location?.lng, address: location?.address }]).select().single();
-    if (complaint && images.length > 0) await Promise.all(images.map(async (f, i) => { const n = `${complaint.id}/${Date.now()}_${i}.${f.name.split(".").pop()}`; await supabase.storage.from("complaint-attachments").upload(n, f); await supabase.from("attachments" as any).insert({ complaint_id: complaint.id, storage_key: n, mime_type: f.type, file_size: f.size }); }));
+    const { data: complaint, error } = await supabase.from("complaints").insert([{ ...formData, priority: formData.priority as any, reporter_id: user.id, latitude: location?.lat, longitude: location?.lng, address: location?.address }]).select().single();
+    if (error || !complaint) {
+      toast.error("Failed to file complaint");
+      setLoading(false);
+      return;
+    }
+    if (images.length > 0) await Promise.all(images.map(async (f, i) => { const n = `${complaint.id}/${Date.now()}_${i}.${f.name.split(".").pop()}`; await supabase.storage.from("complaint-attachments").upload(n, f); await supabase.from("complaint_attachments").insert({ complaint_id: complaint.id, file_url: n, file_type: f.type }); }));
     toast.success("Complaint filed!");
     navigate("/my-complaints");
   };

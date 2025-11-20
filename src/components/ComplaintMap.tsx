@@ -13,7 +13,6 @@ L.Icon.Default.mergeOptions({
 
 interface ComplaintLocation {
   id: string;
-  tracking_id: string;
   title: string;
   status: string;
   priority: string;
@@ -87,7 +86,7 @@ export function ComplaintMap({ complaints, onMarkerClick }: ComplaintMapProps) {
             .addTo(mapRef.current!)
             .bindPopup(`
               <div style="min-width: 200px;">
-                <strong>${complaint.tracking_id}</strong><br/>
+                <strong>ID: ${complaint.id}</strong><br/>
                 <strong>${complaint.title}</strong><br/>
                 <em>${complaint.category.replace("_", " ")}</em><br/>
                 Status: ${complaint.status.replace("_", " ").toUpperCase()}<br/>
