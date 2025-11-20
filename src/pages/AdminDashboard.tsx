@@ -290,6 +290,10 @@ export default function AdminDashboard() {
               <MapPin className="w-4 h-4 mr-2" />
               Map View
             </TabsTrigger>
+            <TabsTrigger value="workload">
+              <Users className="w-4 h-4 mr-2" />
+              Department Workload
+            </TabsTrigger>
             <TabsTrigger value="departments">
               <Building2 className="w-4 h-4 mr-2" />
               Departments
@@ -424,6 +428,14 @@ export default function AdminDashboard() {
                               </DialogContent>
                             </Dialog>
 
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigate(`/complaint/${complaint.id}`)}
+                            >
+                              View Details
+                            </Button>
+
                             <span className="text-sm text-muted-foreground ml-auto">
                               {format(new Date(complaint.created_at), "MMM d, yyyy 'at' h:mm a")}
                             </span>
@@ -446,6 +458,88 @@ export default function AdminDashboard() {
                 }
               }}
             />
+          </TabsContent>
+
+          <TabsContent value="workload" className="space-y-4">
+            {departments.map((dept) => {
+              const deptComplaints = complaints.filter(c => c.assigned_department_id === dept.id);
+              const deptStats = {
+                new: deptComplaints.filter(c => c.status === 'new').length,
+                in_progress: deptComplaints.filter(c => c.status === 'in_progress').length,
+                resolved: deptComplaints.filter(c => c.status === 'resolved').length,
+                closed: deptComplaints.filter(c => c.status === 'closed').length,
+              };
+              
+              return (
+                <Card key={dept.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <Building2 className="w-5 h-5 text-primary" />
+                          {dept.name}
+                        </CardTitle>
+                        <CardDescription className="mt-1">
+                          Total Complaints: {deptComplaints.length}
+                        </CardDescription>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge variant="outline" className="bg-info/10">
+                          New: {deptStats.new}
+                        </Badge>
+                        <Badge variant="outline" className="bg-warning/10">
+                          In Progress: {deptStats.in_progress}
+                        </Badge>
+                        <Badge variant="outline" className="bg-accent/10">
+                          Resolved: {deptStats.resolved}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  {deptComplaints.length > 0 && (
+                    <CardContent>
+                      <div className="space-y-3">
+                        {deptComplaints.slice(0, 5).map((complaint) => (
+                          <div key={complaint.id} className="flex items-start justify-between gap-4 p-3 rounded-lg border bg-card">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate">{complaint.title}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                ID: {complaint.id.slice(0, 8)}... • {complaint.category.replace("_", " ")}
+                              </p>
+                              {complaint.address && (
+                                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                                  <MapPin className="w-3 h-3" />
+                                  {complaint.address}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              <Badge className={statusColors[complaint.status as keyof typeof statusColors] + " text-xs"}>
+                                {complaint.status.replace("_", " ")}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground capitalize">{complaint.priority}</span>
+                            </div>
+                          </div>
+                        ))}
+                        {deptComplaints.length > 5 && (
+                          <p className="text-sm text-muted-foreground text-center pt-2">
+                            And {deptComplaints.length - 5} more complaints...
+                          </p>
+                        )}
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              );
+            })}
+            {departments.length === 0 && (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Building2 className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground">No active departments found</p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="departments">
