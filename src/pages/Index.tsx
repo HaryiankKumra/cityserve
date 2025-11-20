@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate, Link } from "react-router-dom";
-import { FileText, BarChart3, LogOut, Search, MapPin, Shield, Users, TrendingUp, Clock, Phone, Briefcase, Mail } from "lucide-react";
+import { FileText, BarChart3, LogOut, Search, MapPin, Shield, Users, TrendingUp, Clock, Phone, Briefcase, Mail, Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Chatbot } from "@/components/Chatbot";
 import { toast } from "sonner";
@@ -42,10 +42,16 @@ export default function Index() {
             <div className="flex items-center gap-3">
               <ThemeToggle />
               {user ? (
-                <Button variant="outline" size="sm" onClick={handleSignOut}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
+                <>
+                  <Button variant="ghost" size="sm" onClick={() => navigate("/settings")}>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleSignOut}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </>
               ) : (
                 <Button size="sm" onClick={() => navigate("/auth")}>Sign In</Button>
               )}
