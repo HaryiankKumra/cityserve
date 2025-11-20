@@ -1,6 +1,8 @@
 # CityServe Project
 
-A modern web application built with React, TypeScript, and Vite.
+A modern web application built with React, TypeScript, and Vite for managing citizen complaints and civic issues.
+
+**Author:** Haryiank Kumra
 
 ## Getting Started
 
@@ -15,7 +17,7 @@ A modern web application built with React, TypeScript, and Vite.
 git clone <YOUR_GIT_URL>
 
 # Navigate to the project directory
-cd cityserve-lovable
+cd cityserve
 
 # Install dependencies
 npm i
