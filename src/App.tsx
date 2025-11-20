@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "next-themes";
 
 // Page imports - All application pages
 import Index from "./pages/Index";
@@ -21,26 +22,28 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/submit" element={<ComplaintForm />} />
-            <Route path="/my-complaints" element={<MyComplaints />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/track" element={<TrackComplaint />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/complaint/:id" element={<ComplaintDetails />} />
-          <Route path="/departments" element={<DepartmentPortal />} />
-          <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="cityserve-theme">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/submit" element={<ComplaintForm />} />
+              <Route path="/my-complaints" element={<MyComplaints />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/track" element={<TrackComplaint />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/complaint/:id" element={<ComplaintDetails />} />
+              <Route path="/departments" element={<DepartmentPortal />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

@@ -2,6 +2,7 @@ import { Building2, Users, Target, CheckCircle2, Phone, Mail, MapPin } from "luc
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 const About = () => {
   const stats = [
@@ -12,10 +13,10 @@ const About = () => {
   ];
 
   const team = [
-    { name: "Rajesh Kumar", role: "City Manager", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop" },
-    { name: "Priya Sharma", role: "Operations Head", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop" },
-    { name: "Amit Patel", role: "Tech Lead", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop" },
-    { name: "Sneha Reddy", role: "Public Relations", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" },
+    { name: "Haryiank Kumra", role: "City Manager", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop" },
+    { name: "Naman Bansal", role: "Operations Head", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop" },
+    { name: "Manjot Kaur", role: "Tech Lead", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop" },
+    { name: "Bhaumik Verma", role: "Public Relations", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" },
   ];
 
   const workImages = [
@@ -27,6 +28,8 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Navbar />
+      
       {/* Hero Section */}
       <section className="relative py-20 px-4 bg-gradient-to-br from-primary/10 via-background to-accent/10">
         <div className="max-w-6xl mx-auto text-center">
@@ -100,6 +103,34 @@ const About = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Video Section */}
+      <section className="py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-8">How CityServe Works</h2>
+          <p className="text-xl text-muted-foreground text-center max-w-3xl mx-auto mb-12">
+            Watch this video to learn how our platform is transforming citizen-government interaction 
+            and making our cities better places to live.
+          </p>
+          <div className="relative w-full max-w-4xl mx-auto">
+            <div className="relative rounded-lg overflow-hidden shadow-2xl bg-black">
+              <video
+                className="w-full h-auto"
+                controls
+                preload="metadata"
+              >
+                <source src="/Video_Generation_From_Text.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+          <div className="mt-8 text-center">
+            <p className="text-muted-foreground">
+              Want to see CityServe in action? Join thousands of citizens making a difference today.
+            </p>
           </div>
         </div>
       </section>
