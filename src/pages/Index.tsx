@@ -3,8 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { FileText, BarChart3, LogOut, Search, MapPin, Shield, Users, TrendingUp, Clock } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Chatbot } from "@/components/Chatbot";
 
 export default function Index() {
   const { user, signOut } = useAuth();
@@ -17,13 +19,43 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      {/* Navigation Bar */}
+      <nav className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-8">
+              <Link to="/" className="flex items-center gap-2">
+                <Shield className="w-6 h-6 text-primary" />
+                <span className="text-xl font-bold text-primary">CityServe</span>
+              </Link>
+              <div className="hidden md:flex gap-6">
+                <Link to="/" className="text-sm hover:text-primary transition-colors">Home</Link>
+                <Link to="/about" className="text-sm hover:text-primary transition-colors">About</Link>
+                <Link to="/track" className="text-sm hover:text-primary transition-colors">Track</Link>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              {user ? (
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              ) : (
+                <Button size="sm" onClick={() => navigate("/auth")}>Sign In</Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <div className="border-b bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5">
         <div className="max-w-7xl mx-auto px-4 py-12">
           <div className="flex justify-between items-start mb-8">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
                   <Shield className="w-6 h-6 text-primary" />
                 </div>
                 <div>
@@ -37,12 +69,6 @@ export default function Index() {
                 Your voice matters. Report civic issues, track their resolution, and help build a better community together.
               </p>
             </div>
-            {user && (
-              <Button variant="outline" onClick={handleSignOut} className="ml-4">
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
-            )}
           </div>
 
           {/* Quick Stats */}
@@ -240,6 +266,9 @@ export default function Index() {
           </Card>
         )}
       </div>
+
+      {/* Chatbot */}
+      <Chatbot />
     </div>
   );
 }
