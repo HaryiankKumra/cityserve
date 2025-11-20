@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate, Link } from "react-router-dom";
-import { FileText, BarChart3, LogOut, Search, MapPin, Shield, Users, TrendingUp, Clock } from "lucide-react";
+import { FileText, BarChart3, LogOut, Search, MapPin, Shield, Users, TrendingUp, Clock, Phone, Briefcase } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Chatbot } from "@/components/Chatbot";
 
@@ -32,6 +32,7 @@ export default function Index() {
                 <Link to="/" className="text-sm hover:text-primary transition-colors">Home</Link>
                 <Link to="/about" className="text-sm hover:text-primary transition-colors">About</Link>
                 <Link to="/track" className="text-sm hover:text-primary transition-colors">Track</Link>
+                <Link to="/departments" className="text-sm hover:text-primary transition-colors">Departments</Link>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -250,6 +251,27 @@ export default function Index() {
           </CardContent>
         </Card>
 
+        {/* Department Portal Card */}
+        <Card className="mb-12 bg-gradient-to-r from-accent/5 to-primary/5 border-accent/20">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <Briefcase className="w-6 h-6 text-accent" />
+              <div>
+                <CardTitle>Department Portal</CardTitle>
+                <CardDescription>
+                  View all active departments and their assigned work orders
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => navigate("/departments")} variant="outline" size="lg">
+              <Briefcase className="w-4 h-4 mr-2" />
+              View Departments
+            </Button>
+          </CardContent>
+        </Card>
+
         {!user && (
           <Card className="text-center bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
             <CardHeader>
@@ -269,6 +291,23 @@ export default function Index() {
 
       {/* Chatbot */}
       <Chatbot />
+
+      {/* Footer with Phone */}
+      <footer className="border-t bg-card/50 mt-12 py-8">
+        <div className="max-w-7xl mx-auto px-4 text-center space-y-4">
+          <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center gap-2 text-primary font-semibold text-lg">
+              <Phone className="w-5 h-5" />
+              <a href="tel:7986520232" className="hover:underline">
+                7986520232
+              </a>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            © 2025 CityServe. Making our cities better, one complaint at a time.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
