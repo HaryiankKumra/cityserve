@@ -16,6 +16,7 @@ import TrackComplaint from "./pages/TrackComplaint";
 import About from "./pages/About";
 import ComplaintDetails from "./pages/ComplaintDetails";
 import DepartmentPortal from "./pages/DepartmentPortal";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/complaint/:id" element={<ComplaintDetails />} />
               <Route path="/departments" element={<DepartmentPortal />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
