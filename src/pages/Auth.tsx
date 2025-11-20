@@ -70,17 +70,35 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-primary/10 p-4">
-      <div className="w-full max-w-md">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate("/")} 
-          className="mb-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Button>
-        <Card className="w-full shadow-xl">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-primary/10">
+      {/* Header */}
+      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold">CityServe</h1>
+                <p className="text-xs text-muted-foreground">Civic Complaint Management</p>
+              </div>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Auth Form */}
+      <div className="flex items-center justify-center p-4 pt-20">
+        <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-3 text-center">
           <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center">
             <Building2 className="w-8 h-8 text-primary-foreground" />
@@ -178,7 +196,7 @@ export default function Auth() {
           <p className="w-full">
             By continuing, you agree to our Terms of Service and Privacy Policy
           </p>
-        </CardFooter>
+         </CardFooter>
         </Card>
       </div>
     </div>
