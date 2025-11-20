@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, MapPin, Calendar, User, Package, Building2 } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, User, Package, Building2, Phone } from "lucide-react";
 import { format } from "date-fns";
 
 interface Complaint {
@@ -21,7 +22,13 @@ interface Complaint {
   longitude: number | null;
   address: string | null;
   assigned_department_id: string | null;
+  user_id: string;
   departments?: { name: string; contact_phone: string; contact_email: string };
+}
+
+interface UserProfile {
+  full_name: string | null;
+  phone_number: string | null;
 }
 
 interface Attachment {
@@ -40,7 +47,9 @@ const statusColors = {
 export default function ComplaintDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAdmin } = useUserRole();
   const [complaint, setComplaint] = useState<Complaint | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -61,7 +70,20 @@ export default function ComplaintDetails() {
       return;
     }
 
-    setComplaint(complaintData);
+    setComplaint(complaintData as any);
+
+    // Fetch user profile if admin
+    if (isAdmin && (complaintData as any).user_id) {
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("full_name, phone_number")
+        .eq("user_id", (complaintData as any).user_id)
+        .maybeSingle();
+
+      if (profileData) {
+        setUserProfile(profileData);
+      }
+    }
 
     const { data: attachmentData } = await supabase
       .from("complaint_attachments")
@@ -136,6 +158,27 @@ export default function ComplaintDetails() {
             </div>
 
             <Separator />
+
+            {isAdmin && userProfile && (
+              <>
+                <div className="p-4 bg-accent/5 rounded-lg border border-accent/20">
+                  <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                    <User className="w-4 h-4 text-accent" />
+                    Reported By
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <p><span className="font-medium">Name:</span> {userProfile.full_name || "Not provided"}</p>
+                    {userProfile.phone_number && (
+                      <p className="flex items-center gap-2">
+                        <Phone className="w-4 h-4" />
+                        {userProfile.phone_number}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <Separator />
+              </>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
