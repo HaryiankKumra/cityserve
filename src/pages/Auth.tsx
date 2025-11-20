@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Building2, Mail, Lock } from "lucide-react";
+import { Building2, Mail, Lock, ArrowLeft } from "lucide-react";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -71,7 +71,16 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-primary/10 p-4">
-      <Card className="w-full max-w-md shadow-xl">
+      <div className="w-full max-w-md">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate("/")} 
+          className="mb-4"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Home
+        </Button>
+        <Card className="w-full shadow-xl">
         <CardHeader className="space-y-3 text-center">
           <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center">
             <Building2 className="w-8 h-8 text-primary-foreground" />
@@ -170,7 +179,8 @@ export default function Auth() {
             By continuing, you agree to our Terms of Service and Privacy Policy
           </p>
         </CardFooter>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }
