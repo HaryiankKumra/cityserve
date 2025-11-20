@@ -18,13 +18,13 @@ import { DepartmentManager } from "@/components/DepartmentManager";
 
 interface Complaint {
   id: string;
-  tracking_id: string;
   title: string;
   description: string;
   category: string;
   status: string;
   priority: string;
   created_at: string;
+  updated_at: string;
   reporter_id: string;
   latitude: number | null;
   longitude: number | null;
@@ -148,7 +148,7 @@ export default function AdminDashboard() {
   const updateComplaintStatus = async (id: string, status: string) => {
     const { error } = await supabase
       .from("complaints")
-      .update({ status })
+      .update({ status: status as any })
       .eq("id", id);
 
     if (error) {
@@ -163,7 +163,7 @@ export default function AdminDashboard() {
   const updateComplaintPriority = async (id: string, priority: string) => {
     const { error } = await supabase
       .from("complaints")
-      .update({ priority })
+      .update({ priority: priority as any })
       .eq("id", id);
 
     if (error) {
@@ -198,7 +198,6 @@ export default function AdminDashboard() {
     .filter((c) => c.latitude && c.longitude)
     .map((c) => ({
       id: c.id,
-      tracking_id: c.tracking_id,
       title: c.title,
       status: c.status,
       priority: c.priority,
@@ -316,13 +315,13 @@ export default function AdminDashboard() {
                           <div className="flex items-start justify-between gap-4">
                             <div className="space-y-1 flex-1">
                               <CardTitle className="text-lg">{complaint.title}</CardTitle>
-                              <CardDescription>
-                                {complaint.tracking_id} • {complaint.category.replace("_", " ")}
-                                {complaint.address && (
-                                  <>
-                                    <br />
-                                    <MapPin className="w-3 h-3 inline mr-1" />
-                                    {complaint.address}
+                      <CardDescription>
+                        ID: {complaint.id} • {complaint.category.replace("_", " ")}
+                        {complaint.address && (
+                          <>
+                            <br />
+                            <MapPin className="w-3 h-4 inline mr-1" />
+                            {complaint.address}
                                   </>
                                 )}
                               </CardDescription>
@@ -443,7 +442,7 @@ export default function AdminDashboard() {
               onMarkerClick={(complaint) => {
                 const fullComplaint = complaints.find(c => c.id === complaint.id);
                 if (fullComplaint) {
-                  toast.info(`${complaint.tracking_id}: ${complaint.title}`);
+                  toast.info(`ID ${complaint.id}: ${complaint.title}`);
                 }
               }}
             />

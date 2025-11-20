@@ -10,7 +10,6 @@ import { format } from "date-fns";
 
 interface Complaint {
   id: string;
-  tracking_id: string;
   title: string;
   description: string;
   category: string;
@@ -18,6 +17,11 @@ interface Complaint {
   priority: string;
   created_at: string;
   updated_at: string;
+  reporter_id: string;
+  latitude: number | null;
+  longitude: number | null;
+  address: string | null;
+  assigned_department_id: string | null;
 }
 
 const statusColors = {
@@ -104,7 +108,7 @@ export default function MyComplaints() {
                     <div className="space-y-1 flex-1">
                       <CardTitle className="text-xl">{complaint.title}</CardTitle>
                       <CardDescription>
-                        Tracking ID: {complaint.tracking_id}
+                        ID: {complaint.id}
                       </CardDescription>
                     </div>
                     <Badge className={statusColors[complaint.status as keyof typeof statusColors]}>

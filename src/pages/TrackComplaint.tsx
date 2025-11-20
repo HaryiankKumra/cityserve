@@ -20,16 +20,18 @@ const statusColors = {
 
 interface Complaint {
   id: string;
-  tracking_id: string;
   title: string;
   description: string;
   category: string;
   status: string;
   priority: string;
   created_at: string;
-  address: string | null;
+  updated_at: string;
+  reporter_id: string;
   latitude: number | null;
   longitude: number | null;
+  address: string | null;
+  assigned_department_id: string | null;
 }
 
 export default function TrackComplaint() {
@@ -51,9 +53,9 @@ export default function TrackComplaint() {
     setSearched(true);
 
     const { data, error } = await supabase
-      .from("complaints" as any)
+      .from("complaints")
       .select("*")
-      .eq("tracking_id", trackingId.toUpperCase())
+      .eq("id", trackingId)
       .maybeSingle();
 
     if (error) {
@@ -124,7 +126,7 @@ export default function TrackComplaint() {
                 <div>
                   <CardTitle>{complaint.title}</CardTitle>
                   <CardDescription className="flex items-center gap-2 mt-2">
-                    <span className="font-mono text-base">{complaint.tracking_id}</span>
+                    <span className="font-mono text-base">ID: {complaint.id}</span>
                     <Separator orientation="vertical" className="h-4" />
                     <span>{complaint.category.replace("_", " ")}</span>
                   </CardDescription>
