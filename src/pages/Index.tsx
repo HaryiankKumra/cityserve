@@ -1,12 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate, Link } from "react-router-dom";
-import { FileText, BarChart3, LogOut, Search, MapPin, Shield, Users, TrendingUp, Clock, Phone, Briefcase } from "lucide-react";
+import { FileText, BarChart3, LogOut, Search, MapPin, Shield, Users, TrendingUp, Clock, Phone, Briefcase, Mail } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Chatbot } from "@/components/Chatbot";
+import { toast } from "sonner";
 
 export default function Index() {
   const { user, signOut } = useAuth();
@@ -292,19 +296,51 @@ export default function Index() {
       {/* Chatbot */}
       <Chatbot />
 
-      {/* Footer with Phone */}
-      <footer className="border-t bg-card/50 mt-12 py-8">
-        <div className="max-w-7xl mx-auto px-4 text-center space-y-4">
-          <div className="flex items-center justify-center gap-3">
-            <div className="flex items-center gap-2 text-primary font-semibold text-lg">
-              <Phone className="w-5 h-5" />
-              <a href="tel:7986520232" className="hover:underline">
-                7986520232
-              </a>
+      {/* Footer */}
+      <footer className="border-t border-border/40 py-12 px-4 mt-16 bg-card/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h3 className="font-bold text-lg mb-3">Contact Us</h3>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p className="flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  <a href="tel:7986520232" className="hover:text-primary transition-colors">7986520232</a>
+                </p>
+                <p className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  <span>support@cityserve.gov</span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  <span>City Municipal Office, Main Street</span>
+                </p>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="font-bold text-lg mb-3">Quick Contact</h3>
+              <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); toast.success("Thank you! We'll contact you soon."); e.currentTarget.reset(); }}>
+                <Input placeholder="Your email" type="email" required className="h-9" />
+                <Textarea placeholder="Your message" rows={3} required className="resize-none" />
+                <Button type="submit" size="sm" className="w-full">Send Message</Button>
+              </form>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-lg mb-3">Quick Links</h3>
+              <div className="space-y-2 text-sm">
+                <Link to="/about" className="block text-muted-foreground hover:text-primary transition-colors">About Us</Link>
+                <Link to="/departments" className="block text-muted-foreground hover:text-primary transition-colors">Departments</Link>
+                <Link to="/track" className="block text-muted-foreground hover:text-primary transition-colors">Track Complaint</Link>
+              </div>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            © 2025 CityServe. Making our cities better, one complaint at a time.
+          
+          <Separator className="my-6" />
+          
+          <p className="text-center text-sm text-muted-foreground">
+            © 2025 CityServe. Making our cities better, together.
           </p>
         </div>
       </footer>

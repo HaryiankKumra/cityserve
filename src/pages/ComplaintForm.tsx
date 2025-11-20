@@ -28,10 +28,84 @@ export default function ComplaintForm() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [showMap, setShowMap] = useState(false);
   const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
+  const [detectingLocation, setDetectingLocation] = useState(false);
+  const [manualAddress, setManualAddress] = useState("");
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const [formData, setFormData] = useState({ title: "", description: "", category: "", priority: "medium" });
+
+  useEffect(() => {
+    if (showMap && mapContainerRef.current && !mapRef.current) {
+      mapRef.current = L.map(mapContainerRef.current).setView([20.5937, 78.9629], 5);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(mapRef.current);
+
+      mapRef.current.on("click", async (e: L.LeafletMouseEvent) => {
+        const { lat, lng } = e.latlng;
+        if (markerRef.current) markerRef.current.remove();
+        markerRef.current = L.marker([lat, lng]).addTo(mapRef.current!);
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+          const data = await res.json();
+          setLocation({ lat, lng, address: data.display_name || "Unknown location" });
+        } catch {
+          setLocation({ lat, lng, address: "Location selected" });
+        }
+      });
+    }
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [showMap]);
+
+  const detectCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation not supported");
+      return;
+    }
+    setDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude: lat, longitude: lng } = position.coords;
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+          const data = await res.json();
+          setLocation({ lat, lng, address: data.display_name || "Current location" });
+          toast.success("Location detected successfully");
+        } catch {
+          setLocation({ lat, lng, address: "Current location" });
+          toast.success("Location detected");
+        }
+        setDetectingLocation(false);
+      },
+      () => {
+        toast.error("Failed to detect location");
+        setDetectingLocation(false);
+      }
+    );
+  };
+
+  const geocodeAddress = async () => {
+    if (!manualAddress.trim()) return toast.error("Please enter an address");
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(manualAddress)}&format=json&limit=1`);
+      const data = await res.json();
+      if (data[0]) {
+        setLocation({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), address: data[0].display_name });
+        toast.success("Address found");
+      } else {
+        toast.error("Address not found");
+      }
+    } catch {
+      toast.error("Failed to geocode address");
+    }
+  };
 
   useEffect(() => { if (!user) navigate("/auth"); }, [user, navigate]);
 
@@ -66,6 +140,25 @@ export default function ComplaintForm() {
             <div><Label>Category *</Label><Select value={formData.category} onValueChange={v => setFormData({...formData, category: v})} required><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="road_maintenance">Road</SelectItem><SelectItem value="street_lighting">Lighting</SelectItem><SelectItem value="waste_management">Waste</SelectItem></SelectContent></Select></div>
             <div><Label>Description * (min 50 chars)</Label><Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={5} required minLength={50} /><p className="text-xs text-muted-foreground">{formData.description.length}/50</p></div>
             <div><Label>Images</Label><Button type="button" variant="outline" onClick={() => document.getElementById("img")?.click()}><Upload className="w-4 h-4 mr-2" />Upload ({images.length}/5)</Button><input id="img" type="file" accept="image/*" multiple className="hidden" onChange={handleImageChange} />{imagePreviews.length > 0 && <div className="grid grid-cols-3 gap-2">{imagePreviews.map((p, i) => <div key={i} className="relative aspect-square"><img src={p} className="w-full h-full object-cover rounded" /><Button type="button" size="sm" variant="destructive" className="absolute top-1 right-1 h-6 w-6 p-0" onClick={() => { setImages(prev => prev.filter((_, idx) => idx !== i)); setImagePreviews(prev => prev.filter((_, idx) => idx !== i)); }}><X className="w-3 h-3" /></Button></div>)}</div>}</div>
+            
+            <div className="space-y-3">
+              <Label>Location (Optional)</Label>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={detectCurrentLocation} disabled={detectingLocation} className="flex-1">
+                  <MapPin className="w-4 h-4 mr-2" />{detectingLocation ? "Detecting..." : "Detect Location"}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setShowMap(!showMap)} className="flex-1">
+                  <MapPin className="w-4 h-4 mr-2" />{showMap ? "Hide Map" : "Select on Map"}
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <Input placeholder="Or enter address manually..." value={manualAddress} onChange={(e) => setManualAddress(e.target.value)} />
+                <Button type="button" variant="outline" onClick={geocodeAddress}>Find</Button>
+              </div>
+              {location && <p className="text-sm text-muted-foreground"><MapPin className="w-3 h-3 inline mr-1" />{location.address}</p>}
+              {showMap && <div ref={mapContainerRef} className="h-[300px] w-full rounded-lg border" />}
+            </div>
+
             <Button type="submit" className="w-full" disabled={loading}>{loading ? "Submitting..." : "Submit Complaint"}</Button>
           </form></CardContent></Card>
       </div>
