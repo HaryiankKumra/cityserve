@@ -1,16 +1,78 @@
-import { Building2, Users, Target, CheckCircle2, Phone, Mail, MapPin } from "lucide-react";
+import { Building2, Users, Target, CheckCircle2, Phone, Mail, MapPin, BarChart3 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const About = () => {
+  const [analyticsData, setAnalyticsData] = useState<any[]>([]);
+  const [liveComplaintsCount, setLiveComplaintsCount] = useState(0);
+  const [timePeriod, setTimePeriod] = useState<'1month' | '6months' | '1year'>('1month');
+
   const stats = [
     { label: "Complaints Resolved", value: "10,000+", icon: CheckCircle2 },
     { label: "Active Citizens", value: "50,000+", icon: Users },
     { label: "City Departments", value: "25+", icon: Building2 },
     { label: "Response Time", value: "24hrs", icon: Target },
   ];
+
+  useEffect(() => {
+    fetchAnalytics();
+    fetchLiveComplaints();
+  }, [timePeriod]);
+
+  const fetchLiveComplaints = async () => {
+    const { count } = await supabase
+      .from('complaints')
+      .select('*', { count: 'exact', head: true })
+      .in('status', ['new', 'in_progress']);
+    
+    setLiveComplaintsCount(count || 0);
+  };
+
+  const fetchAnalytics = async () => {
+    const now = new Date();
+    let startDate = new Date();
+    
+    switch(timePeriod) {
+      case '1month':
+        startDate.setMonth(now.getMonth() - 1);
+        break;
+      case '6months':
+        startDate.setMonth(now.getMonth() - 6);
+        break;
+      case '1year':
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+    }
+
+    const { data: complaints } = await supabase
+      .from('complaints')
+      .select('department_id, status, departments(name)')
+      .eq('status', 'resolved')
+      .gte('updated_at', startDate.toISOString());
+
+    // Group by department
+    const grouped = complaints?.reduce((acc: any, curr: any) => {
+      const deptName = curr.departments?.name || 'Unassigned';
+      if (!acc[deptName]) {
+        acc[deptName] = 0;
+      }
+      acc[deptName]++;
+      return acc;
+    }, {});
+
+    const chartData = Object.entries(grouped || {}).map(([name, count]) => ({
+      department: name,
+      resolved: count
+    }));
+
+    setAnalyticsData(chartData);
+  };
 
   const team = [
     { name: "Haryiank Kumra", role: "City Manager", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop" },
@@ -104,6 +166,75 @@ const About = () => {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Analytics Section */}
+      <section className="py-16 px-4 bg-gradient-to-br from-primary/5 to-accent/5">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <BarChart3 className="w-16 h-16 mx-auto mb-4 text-primary" />
+            <h2 className="text-4xl font-bold mb-4">Live Analytics</h2>
+            <p className="text-xl text-muted-foreground">
+              Real-time insights into complaint resolution across departments
+            </p>
+          </div>
+
+          {/* Live Complaints Counter */}
+          <Card className="p-8 mb-8 text-center bg-gradient-to-r from-primary/10 to-accent/10">
+            <div className="text-5xl font-bold text-primary mb-2">{liveComplaintsCount}</div>
+            <div className="text-xl text-muted-foreground">Active Complaints Right Now</div>
+          </Card>
+
+          {/* Time Period Tabs */}
+          <Tabs value={timePeriod} onValueChange={(v) => setTimePeriod(v as any)} className="w-full">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 mb-8">
+              <TabsTrigger value="1month">1 Month</TabsTrigger>
+              <TabsTrigger value="6months">6 Months</TabsTrigger>
+              <TabsTrigger value="1year">1 Year</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value={timePeriod} className="mt-0">
+              <Card className="p-6">
+                <h3 className="text-2xl font-semibold mb-6 text-center">
+                  Complaints Resolved by Department
+                </h3>
+                {analyticsData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={analyticsData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis 
+                        dataKey="department" 
+                        angle={-45}
+                        textAnchor="end"
+                        height={100}
+                        className="text-sm"
+                      />
+                      <YAxis />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--card))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Legend />
+                      <Bar 
+                        dataKey="resolved" 
+                        fill="hsl(var(--primary))" 
+                        name="Resolved Complaints"
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground">
+                    No resolved complaints data available for this period
+                  </div>
+                )}
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </section>
 
