@@ -113,7 +113,7 @@ export default function Settings() {
 
     const { error } = await supabase
       .from("profiles")
-      .upsert(updates);
+      .upsert(updates, { onConflict: 'user_id' });
 
     if (error) {
       toast.error("Failed to update profile");

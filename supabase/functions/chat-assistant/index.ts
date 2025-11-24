@@ -10,17 +10,16 @@ serve(async (req) => {
 
   try {
     const { messages } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
-    const systemPrompt = `You are CityServe Assistant, an AI helper for a civic complaint management portal created by Haryank Kumra.
+    const systemPrompt = `You are CityServe Assistant, an AI helper for a civic complaint management portal.
 
 IMPORTANT CONTEXT:
 - This is a complaint portal for citizens to report civic issues like roads, water supply, electricity, sanitation, and parks
 - Citizens can submit complaints, track status, upload photos, and view complaint history
 - Departments can manage and resolve complaints
 - Admins can oversee all operations and analytics
-- Author: Haryank Kumra - For more details, visit haryank.me
 
 CAPABILITIES:
 1. Filing Complaints: Guide users on how to submit complaints with location, photos, and descriptions
@@ -33,43 +32,35 @@ GUIDELINES:
 - Be helpful, concise, and friendly
 - Keep responses under 3-4 sentences unless detailed explanation is needed
 - Always stay within the context of civic complaint management
-- Refer to the author (Haryank Kumra) when asked about the project
-- Direct users to haryank.me for more information about the creator
 
 Answer user queries related to this complaint portal system.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:streamGenerateContent?alt=sse&key=" + GEMINI_API_KEY, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages,
+        contents: [
+          { role: "user", parts: [{ text: systemPrompt }] },
+          ...messages.map((msg: any) => ({
+            role: msg.role === "assistant" ? "model" : "user",
+            parts: [{ text: msg.content }]
+          }))
         ],
-        stream: true,
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        }
       }),
     });
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limits exceeded, please try again later." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required, please add funds to your workspace." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI gateway error" }), {
+      const errorText = await response.text();
+      console.error("Gemini API error:", response.status, errorText);
+      return new Response(JSON.stringify({ error: "AI service error" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
