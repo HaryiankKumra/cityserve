@@ -13,11 +13,22 @@ import {
   Clock,
   Sparkles,
   TrendingUp,
-  Award
+  Award,
+  Mail,
+  Phone,
+  Send
 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Landing() {
   const navigate = useNavigate();
+  const [contactForm, setContactForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const [submitting, setSubmitting] = useState(false);
 
   const features = [
     {
@@ -199,12 +210,173 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Contact Section */}
+      <section className="py-24 bg-gradient-to-b from-background to-muted/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+              <Mail className="w-4 h-4" />
+              Get In Touch
+            </div>
+            <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">Contact Us</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12">
+            {/* Contact Form */}
+            <Card className="border-2 hover:border-primary/50 transition-colors">
+              <CardContent className="pt-8">
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  setSubmitting(true);
+                  
+                  try {
+                    const { error } = await supabase
+                      .from('contact_messages')
+                      .insert([{
+                        name: contactForm.name,
+                        email: contactForm.email,
+                        phone: contactForm.phone || null,
+                        message: contactForm.message
+                      }]);
+
+                    if (error) {
+                      console.error('Error submitting contact form:', error);
+                      toast.error("Failed to send message. Please try again.");
+                    } else {
+                      toast.success("Message sent successfully! We'll get back to you soon.");
+                      setContactForm({ name: "", email: "", phone: "", message: "" });
+                    }
+                  } catch (error) {
+                    console.error('Error:', error);
+                    toast.error("Failed to send message. Please try again.");
+                  } finally {
+                    setSubmitting(false);
+                  }
+                }} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full Name *</Label>
+                    <Input
+                      id="name"
+                      placeholder="John Doe"
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="john@example.com"
+                      value={contactForm.email}
+                      onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+91 98765 43210"
+                      value={contactForm.phone}
+                      onChange={(e) => setContactForm({...contactForm, phone: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="message">Your Message *</Label>
+                    <Textarea
+                      id="message"
+                      placeholder="Tell us how we can help you..."
+                      rows={5}
+                      value={contactForm.message}
+                      onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                      required
+                    />
+                  </div>
+
+                  <Button type="submit" className="w-full" size="lg" disabled={submitting}>
+                    <Send className="w-4 h-4 mr-2" />
+                    {submitting ? "Sending..." : "Send Message"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Office Location & Map */}
+            <div className="space-y-6">
+              <Card className="border-2">
+                <CardContent className="pt-8 space-y-6">
+                  <div>
+                    <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                      <MapPin className="w-6 h-6 text-primary" />
+                      Our Office
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Visit us at our main office for in-person assistance
+                    </p>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3">
+                        <MapPin className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                        <div>
+                          <p className="font-semibold">Address</p>
+                          <p className="text-sm text-muted-foreground">
+                            Thapar University<br />
+                            Patiala, Punjab<br />
+                            India
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Phone className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                        <div>
+                          <p className="font-semibold">Phone</p>
+                          <p className="text-sm text-muted-foreground">+91 98765 43210</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Mail className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                        <div>
+                          <p className="font-semibold">Email</p>
+                          <p className="text-sm text-muted-foreground">support@cityserve.in</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Map */}
+                  <div className="rounded-lg overflow-hidden border-2 h-[300px]">
+                    <iframe
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3443.8970841842877!2d76.36354831512!3d30.35365408177!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391028ab86cd6c6f%3A0x86219d2c946b2233!2sThapar%20Institute%20of%20Engineering%20and%20Technology!5e0!3m2!1sen!2sin!4v1234567890"
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="Thapar University Location"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="py-12 border-t bg-muted/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
-              © 2024 CityServe. All rights reserved.
+              © 2025 CityServe. All rights reserved.
             </p>
           </div>
         </div>
