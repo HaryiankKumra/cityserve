@@ -75,10 +75,10 @@ const About = () => {
   };
 
   const team = [
-    { name: "Haryiank Kumra", role: "City Manager", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop" },
-    { name: "Naman Bansal", role: "Operations Head", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop" },
-    { name: "Manjot Kaur", role: "Tech Lead", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop" },
-    { name: "Bhaumik Verma", role: "Public Relations", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" },
+    { name: "Haryiank Kumra", role: "City Manager", image: "/haryiank.jpg" },
+    { name: "Naman Bansal", role: "Operations Head", image: "https://media.licdn.com/dms/image/v2/D5603AQHwsMvymBxX9g/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1728845303855?e=1765411200&v=beta&t=kEveRsWHtUOqwUSpGI5GaOzy3-ORDc7v87QpL6xGW1A" },
+    { name: "Manjot Kaur", role: "Tech Lead", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" },
+    { name: "Bhaumik Verma", role: "Public Relations", image: "/bhaumik.jpg" },
   ];
 
   const workImages = [
