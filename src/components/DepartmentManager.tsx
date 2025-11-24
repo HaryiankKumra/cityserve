@@ -29,6 +29,8 @@ export function DepartmentManager() {
     contact_email: "",
     contact_phone: "",
   });
+  const [newDepartmentName, setNewDepartmentName] = useState("");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchDepartments();
@@ -63,6 +65,37 @@ export function DepartmentManager() {
       toast.success("Department created successfully");
       setIsOpen(false);
       setFormData({ name: "", description: "", contact_email: "", contact_phone: "" });
+      fetchDepartments();
+    }
+  };
+
+  const handleAddDepartment = async () => {
+    if (!newDepartmentName.trim()) {
+      toast.error("Please enter a department name");
+      return;
+    }
+
+    // Check for duplicate department names
+    const existingDept = departments.find(
+      d => d.name.toLowerCase() === newDepartmentName.trim().toLowerCase()
+    );
+    
+    if (existingDept) {
+      toast.error("A department with this name already exists");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("departments")
+      .insert([{ name: newDepartmentName.trim() }]);
+
+    if (error) {
+      console.error("Error adding department:", error);
+      toast.error("Failed to add department");
+    } else {
+      toast.success("Department added successfully");
+      setNewDepartmentName("");
+      setIsAddDialogOpen(false);
       fetchDepartments();
     }
   };

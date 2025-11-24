@@ -72,29 +72,60 @@ export default function AdminDashboard() {
     }
 
     if (isAdmin) {
-      fetchComplaints();
-      fetchDepartments();
+      // Fetch in parallel for faster loading
+      Promise.all([fetchStats(), fetchDepartments(), fetchComplaints()]);
       setupRealtimeSubscription();
     }
   }, [user, isAdmin, roleLoading, navigate]);
 
+  const fetchStats = async () => {
+    // Only fetch counts, not full data - MUCH faster
+    const [newCount, progressCount, resolvedCount, closedCount] = await Promise.all([
+      supabase.from("complaints").select("id", { count: "exact", head: true }).eq("status", "new"),
+      supabase.from("complaints").select("id", { count: "exact", head: true }).eq("status", "in_progress"),
+      supabase.from("complaints").select("id", { count: "exact", head: true }).eq("status", "resolved"),
+      supabase.from("complaints").select("id", { count: "exact", head: true }).eq("status", "closed"),
+    ]);
+
+    setStats({
+      new: newCount.count || 0,
+      in_progress: progressCount.count || 0,
+      resolved: resolvedCount.count || 0,
+      closed: closedCount.count || 0,
+    });
+  };
+
   const fetchComplaints = async () => {
+    setLoading(true);
+    // Limit to 50 most recent complaints for faster loading
     const { data, error } = await supabase
       .from("complaints")
       .select(`
-        *,
+        id,
+        title,
+        description,
+        category,
+        status,
+        priority,
+        created_at,
+        updated_at,
+        reporter_id,
+        latitude,
+        longitude,
+        address,
+        assigned_department_id,
         departments (
           name
         )
       `)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(50);
 
     if (error) {
       console.error("Error fetching complaints:", error);
       toast.error("Failed to load complaints");
     } else {
       setComplaints(data || []);
-      calculateStats(data || []);
     }
     setLoading(false);
   };
@@ -103,13 +134,22 @@ export default function AdminDashboard() {
     const { data, error } = await supabase
       .from("departments")
       .select("id, name, is_active")
-      .eq("is_active", true)
       .order("name");
 
     if (error) {
       console.error("Error fetching departments:", error);
     } else {
-      setDepartments(data || []);
+      // Add counter for duplicate names
+      const nameCount: Record<string, number> = {};
+      const processedDepts = (data || []).map(dept => {
+        const baseName = dept.name;
+        nameCount[baseName] = (nameCount[baseName] || 0) + 1;
+        const displayName = nameCount[baseName] > 1 
+          ? `${baseName} (${nameCount[baseName]})` 
+          : baseName;
+        return { ...dept, displayName };
+      });
+      setDepartments(processedDepts as any);
     }
   };
 
@@ -132,17 +172,6 @@ export default function AdminDashboard() {
     return () => {
       supabase.removeChannel(channel);
     };
-  };
-
-  const calculateStats = (data: Complaint[]) => {
-    const stats = data.reduce(
-      (acc, complaint) => {
-        acc[complaint.status as keyof typeof acc]++;
-        return acc;
-      },
-      { new: 0, in_progress: 0, resolved: 0, closed: 0 }
-    );
-    setStats(stats);
   };
 
   const updateComplaintStatus = async (id: string, status: string) => {
@@ -177,6 +206,13 @@ export default function AdminDashboard() {
 
   const assignDepartment = async () => {
     if (!selectedComplaint || !assignDepartmentId) return;
+
+    // Check if selected department is active
+    const selectedDept = departments.find(d => d.id === assignDepartmentId);
+    if (selectedDept && !selectedDept.is_active) {
+      toast.error("Cannot assign to this department as it is currently deactivated");
+      return;
+    }
 
     const { error } = await supabase
       .from("complaints")
@@ -429,16 +465,31 @@ export default function AdminDashboard() {
                                         </SelectTrigger>
                                         <SelectContent>
                                           {departments.map((dept) => (
-                                            <SelectItem key={dept.id} value={dept.id}>
-                                              {dept.name}
+                                            <SelectItem 
+                                              key={dept.id} 
+                                              value={dept.id}
+                                              disabled={!dept.is_active}
+                                            >
+                                              {(dept as any).displayName || dept.name} {!dept.is_active && "(Deactivated)"}
                                             </SelectItem>
                                           ))}
                                         </SelectContent>
                                       </Select>
+                                      {assignDepartmentId && departments.find(d => d.id === assignDepartmentId && !d.is_active) && (
+                                        <p className="text-xs text-destructive mt-2 flex items-center gap-1">
+                                          <AlertCircle className="w-3 h-3" />
+                                          This department is currently deactivated and cannot be assigned
+                                        </p>
+                                      )}
                                     </div>
                                   </div>
                                   <DialogFooter>
-                                    <Button onClick={assignDepartment}>Assign</Button>
+                                    <Button 
+                                      onClick={assignDepartment}
+                                      disabled={!assignDepartmentId || !departments.find(d => d.id === assignDepartmentId)?.is_active}
+                                    >
+                                      Assign
+                                    </Button>
                                   </DialogFooter>
                                 </DialogContent>
                               </Dialog>
