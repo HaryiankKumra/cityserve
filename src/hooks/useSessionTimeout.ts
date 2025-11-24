@@ -1,52 +1,49 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
-const THROTTLE_DELAY = 5000; // Only reset timeout every 5 seconds
-
 export function useSessionTimeout() {
-  const { signOut, user } = useAuth();
-  const lastActivityRef = useRef<number>(Date.now());
-  const timeoutIdRef = useRef<NodeJS.Timeout>();
-
-  const handleLogout = useCallback(async () => {
-    toast.info("Your session has expired. Please sign in again.");
-    await signOut();
-  }, [signOut]);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user) return;
 
-    const resetTimeout = () => {
-      const now = Date.now();
-      
-      // Throttle: only reset if enough time has passed since last activity
-      if (now - lastActivityRef.current < THROTTLE_DELAY) {
-        return;
-      }
-      
-      lastActivityRef.current = now;
-      
-      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-      timeoutIdRef.current = setTimeout(handleLogout, SESSION_TIMEOUT);
+    let timeoutId: NodeJS.Timeout;
+    let warningId: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      clearTimeout(warningId);
+
+      // Warn at 14 minutes
+      warningId = setTimeout(() => {
+        toast.warning(
+          "Your session will expire in 1 minute due to inactivity",
+          {
+            duration: 60000,
+          }
+        );
+      }, 14 * 60 * 1000);
+
+      // Logout at 15 minutes
+      timeoutId = setTimeout(() => {
+        signOut();
+        navigate("/auth");
+        toast.error("Session expired due to inactivity");
+      }, 15 * 60 * 1000);
     };
 
-    // Reduce to fewer, more meaningful events
-    const events = ["mousedown", "keydown"];
+    const events = ["mousedown", "keydown", "scroll", "touchstart"];
+    events.forEach((event) => document.addEventListener(event, resetTimer));
 
-    events.forEach((event) => {
-      window.addEventListener(event, resetTimeout, { passive: true });
-    });
-
-    // Initial timeout
-    resetTimeout();
+    resetTimer();
 
     return () => {
-      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-      events.forEach((event) => {
-        window.removeEventListener(event, resetTimeout);
-      });
+      clearTimeout(timeoutId);
+      clearTimeout(warningId);
+      events.forEach((event) => document.removeEventListener(event, resetTimer));
     };
-  }, [user, handleLogout]);
+  }, [user, signOut, navigate]);
 }
