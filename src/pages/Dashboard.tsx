@@ -19,7 +19,7 @@ import {
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isModerator } = useUserRole();
   useSessionTimeout();
 
   useEffect(() => {
@@ -85,7 +85,17 @@ export default function Dashboard() {
     },
   ] : [];
 
-  const allActions = [...quickActions, ...adminActions];
+  const moderatorActions = isModerator && !isAdmin ? [
+    {
+      title: "Moderator Portal",
+      description: "Review and manage complaints",
+      icon: <Shield className="h-8 w-8" />,
+      onClick: () => navigate("/department-portal"),
+      color: "text-blue-500",
+    },
+  ] : [];
+
+  const allActions = [...quickActions, ...adminActions, ...moderatorActions];
 
   return (
     <div className="min-h-screen bg-background">
