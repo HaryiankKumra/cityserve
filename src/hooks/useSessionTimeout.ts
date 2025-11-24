@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -6,43 +6,47 @@ import { toast } from "sonner";
 export function useSessionTimeout() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+  const warningIdRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!user) return;
 
-    let timeoutId: NodeJS.Timeout;
-    let warningId: NodeJS.Timeout;
+    const INACTIVE_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+    const WARNING_TIME = 29 * 60 * 1000; // 29 minutes
 
     const resetTimer = () => {
-      clearTimeout(timeoutId);
-      clearTimeout(warningId);
+      // Clear existing timers
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+      if (warningIdRef.current) clearTimeout(warningIdRef.current);
 
-      // Warn at 14 minutes
-      warningId = setTimeout(() => {
-        toast.warning(
-          "Your session will expire in 1 minute due to inactivity",
-          {
-            duration: 60000,
-          }
-        );
-      }, 14 * 60 * 1000);
+      // Show warning 1 minute before logout
+      warningIdRef.current = setTimeout(() => {
+        toast.warning("Your session will expire in 1 minute due to inactivity", {
+          duration: 60000,
+        });
+      }, WARNING_TIME);
 
-      // Logout at 15 minutes
-      timeoutId = setTimeout(() => {
-        signOut();
+      // Logout after 30 minutes of inactivity
+      timeoutIdRef.current = setTimeout(async () => {
+        await signOut();
         navigate("/auth");
         toast.error("Session expired due to inactivity");
-      }, 15 * 60 * 1000);
+      }, INACTIVE_TIMEOUT);
     };
 
-    const events = ["mousedown", "keydown", "scroll", "touchstart"];
-    events.forEach((event) => document.addEventListener(event, resetTimer));
+    // Events that indicate user activity
+    const events = ["mousedown", "keydown", "scroll", "touchstart", "click"];
+
+    events.forEach((event) => {
+      document.addEventListener(event, resetTimer, { passive: true });
+    });
 
     resetTimer();
 
     return () => {
-      clearTimeout(timeoutId);
-      clearTimeout(warningId);
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+      if (warningIdRef.current) clearTimeout(warningIdRef.current);
       events.forEach((event) => document.removeEventListener(event, resetTimer));
     };
   }, [user, signOut, navigate]);

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { ArrowLeft, MapPin, Upload, X, Camera } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -23,7 +24,7 @@ L.Icon.Default.mergeOptions({
 export default function ComplaintForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  // useSessionTimeout(); // TEMPORARILY COMMENT THIS OUT
+  useSessionTimeout(); // Re-enabled with proper fix
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
