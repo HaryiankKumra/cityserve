@@ -219,6 +219,7 @@ export default function AdminDashboard() {
   }
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-background">
       {/* Fixed Header with Sign Out */}
       <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -250,9 +251,24 @@ export default function AdminDashboard() {
             <span className="hidden sm:inline">Sign Out</span>
             <span className="sm:hidden">Out</span>
           </Button>
+=======
+    <div className="min-h-screen bg-background p-2 sm:p-4">
+      <div className="max-w-7xl mx-auto py-4 sm:py-8">
+        <Button variant="ghost" onClick={() => navigate("/")} className="mb-4 sm:mb-6" size="sm">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Admin Dashboard</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Manage and track all citizen complaints
+          </p>
+>>>>>>> 0e5f83a9815df6baca7c6dcdad7d7dc972318a22
         </div>
       </div>
 
+<<<<<<< HEAD
       <div className="max-w-7xl mx-auto p-2 sm:p-4 pb-6">
         <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6 px-2">
           Manage and track all citizen complaints
@@ -304,11 +320,56 @@ export default function AdminDashboard() {
               <div className="flex items-center gap-1 sm:gap-2">
                 <XCircle className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-muted-foreground flex-shrink-0" />
                 <span className="text-xl sm:text-2xl md:text-3xl font-bold">{stats.closed}</span>
+=======
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <Card>
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardDescription className="text-xs sm:text-sm">New</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-info" />
+                <span className="text-2xl sm:text-3xl font-bold">{stats.new}</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardDescription className="text-xs sm:text-sm">Progress</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
+                <span className="text-2xl sm:text-3xl font-bold">{stats.in_progress}</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardDescription className="text-xs sm:text-sm">Resolved</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
+                <span className="text-2xl sm:text-3xl font-bold">{stats.resolved}</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardDescription className="text-xs sm:text-sm">Closed</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                <span className="text-2xl sm:text-3xl font-bold">{stats.closed}</span>
+>>>>>>> 0e5f83a9815df6baca7c6dcdad7d7dc972318a22
               </div>
             </CardContent>
           </Card>
         </div>
 
+<<<<<<< HEAD
         <Tabs defaultValue="list" className="space-y-3 sm:space-y-4">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1">
             <TabsTrigger value="list" className="text-xs sm:text-sm">
@@ -338,6 +399,34 @@ export default function AdminDashboard() {
                 <TabsTrigger value="all" className="text-xs sm:text-sm">All</TabsTrigger>
                 <TabsTrigger value="new" className="text-xs sm:text-sm">New</TabsTrigger>
                 <TabsTrigger value="in_progress" className="text-xs sm:text-sm">In Progress</TabsTrigger>
+=======
+        <Tabs defaultValue="list" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 h-auto">
+            <TabsTrigger value="list" className="text-xs sm:text-sm px-2 py-2">
+              <AlertCircle className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Complaints</span>
+            </TabsTrigger>
+            <TabsTrigger value="map" className="text-xs sm:text-sm px-2 py-2">
+              <MapPin className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Map</span>
+            </TabsTrigger>
+            <TabsTrigger value="workload" className="text-xs sm:text-sm px-2 py-2">
+              <Users className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Workload</span>
+            </TabsTrigger>
+            <TabsTrigger value="departments" className="text-xs sm:text-sm px-2 py-2">
+              <Building2 className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Departments</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="list" className="space-y-4">
+            <Tabs defaultValue="all" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+                <TabsTrigger value="all" className="text-xs sm:text-sm">All</TabsTrigger>
+                <TabsTrigger value="new" className="text-xs sm:text-sm">New</TabsTrigger>
+                <TabsTrigger value="in_progress" className="text-xs sm:text-sm">Progress</TabsTrigger>
+>>>>>>> 0e5f83a9815df6baca7c6dcdad7d7dc972318a22
                 <TabsTrigger value="resolved" className="text-xs sm:text-sm">Resolved</TabsTrigger>
               </TabsList>
 
@@ -346,6 +435,7 @@ export default function AdminDashboard() {
                   {complaints
                     .filter((c) => tab === "all" || c.status === tab)
                     .map((complaint) => (
+<<<<<<< HEAD
                       <Card key={complaint.id} className="overflow-hidden">
                         <CardHeader className="pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
                           <div className="flex flex-col gap-2">
@@ -426,17 +516,93 @@ export default function AdminDashboard() {
                             
                             {/* Action Buttons Row */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+=======
+                      <Card key={complaint.id}>
+                        <CardHeader className="pb-3">
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
+                            <div className="space-y-1 flex-1">
+                              <CardTitle className="text-base sm:text-lg">{complaint.title}</CardTitle>
+                              <CardDescription className="text-xs sm:text-sm">
+                                <span className="block sm:inline">ID: {complaint.id.slice(0, 8)}...</span>
+                                <span className="hidden sm:inline"> • </span>
+                                <span className="block sm:inline">{complaint.category.replace("_", " ")}</span>
+                                {complaint.address && (
+                                  <span className="block mt-1">
+                                    <MapPin className="w-3 h-3 inline mr-1" />
+                                    {complaint.address}
+                                  </span>
+                                )}
+                              </CardDescription>
+                            </div>
+                            <Badge className={`${statusColors[complaint.status as keyof typeof statusColors]} text-xs whitespace-nowrap`}>
+                              {complaint.status.replace("_", " ").toUpperCase()}
+                            </Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-3 sm:space-y-4">
+                          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{complaint.description}</p>
+                          
+                          {complaint.departments && (
+                            <div className="flex items-center gap-2 text-xs sm:text-sm">
+                              <Building2 className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+                              <span className="font-medium">Assigned: {complaint.departments.name}</span>
+                            </div>
+                          )}
+
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 flex-wrap">
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                              <span className="text-xs sm:text-sm text-muted-foreground">Status:</span>
+                              <Select
+                                value={complaint.status}
+                                onValueChange={(value) => updateComplaintStatus(complaint.id, value)}
+                              >
+                                <SelectTrigger className="w-full sm:w-[130px] h-8 text-xs sm:text-sm">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="new">New</SelectItem>
+                                  <SelectItem value="in_progress">Progress</SelectItem>
+                                  <SelectItem value="resolved">Resolved</SelectItem>
+                                  <SelectItem value="closed">Closed</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                              <span className="text-xs sm:text-sm text-muted-foreground">Priority:</span>
+                              <Select
+                                value={complaint.priority}
+                                onValueChange={(value) => updateComplaintPriority(complaint.id, value)}
+                              >
+                                <SelectTrigger className="w-full sm:w-[110px] h-8 text-xs sm:text-sm">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="low">Low</SelectItem>
+                                  <SelectItem value="medium">Medium</SelectItem>
+                                  <SelectItem value="high">High</SelectItem>
+                                  <SelectItem value="critical">Critical</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+>>>>>>> 0e5f83a9815df6baca7c6dcdad7d7dc972318a22
                               <Dialog>
                                 <DialogTrigger asChild>
                                   <Button 
                                     size="sm" 
                                     variant="outline"
+<<<<<<< HEAD
                                     className="w-full text-xs h-8"
+=======
+                                    className="w-full sm:w-auto text-xs"
+>>>>>>> 0e5f83a9815df6baca7c6dcdad7d7dc972318a22
                                     onClick={() => {
                                       setSelectedComplaint(complaint.id);
                                       setAssignDepartmentId(complaint.assigned_department_id || "");
                                     }}
                                   >
+<<<<<<< HEAD
                                     <Users className="w-3 h-3 mr-1.5" />
                                     Assign Dept
                                   </Button>
@@ -451,16 +617,40 @@ export default function AdminDashboard() {
                                   <div className="space-y-3 py-3">
                                     <div>
                                       <Label className="text-xs">Department</Label>
+=======
+                                    <Users className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+                                    <span className="ml-2 sm:ml-0">Assign Dept</span>
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-[90vw] sm:max-w-md">
+                                  <DialogHeader>
+                                    <DialogTitle>Assign Department</DialogTitle>
+                                    <DialogDescription>
+                                      Select a department to handle this complaint.
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="space-y-4 py-4">
+                                    <div>
+                                      <Label>Department</Label>
+>>>>>>> 0e5f83a9815df6baca7c6dcdad7d7dc972318a22
                                       <Select
                                         value={assignDepartmentId}
                                         onValueChange={setAssignDepartmentId}
                                       >
+<<<<<<< HEAD
                                         <SelectTrigger className="text-xs mt-1">
+=======
+                                        <SelectTrigger>
+>>>>>>> 0e5f83a9815df6baca7c6dcdad7d7dc972318a22
                                           <SelectValue placeholder="Select a department" />
                                         </SelectTrigger>
                                         <SelectContent>
                                           {departments.map((dept) => (
+<<<<<<< HEAD
                                             <SelectItem key={dept.id} value={dept.id} className="text-xs">
+=======
+                                            <SelectItem key={dept.id} value={dept.id}>
+>>>>>>> 0e5f83a9815df6baca7c6dcdad7d7dc972318a22
                                               {dept.name}
                                             </SelectItem>
                                           ))}
@@ -469,9 +659,13 @@ export default function AdminDashboard() {
                                     </div>
                                   </div>
                                   <DialogFooter>
+<<<<<<< HEAD
                                     <Button onClick={assignDepartment} size="sm" className="text-xs">
                                       Assign
                                     </Button>
+=======
+                                    <Button onClick={assignDepartment}>Assign</Button>
+>>>>>>> 0e5f83a9815df6baca7c6dcdad7d7dc972318a22
                                   </DialogFooter>
                                 </DialogContent>
                               </Dialog>
@@ -479,17 +673,27 @@ export default function AdminDashboard() {
                               <Button
                                 variant="ghost"
                                 size="sm"
+<<<<<<< HEAD
                                 className="w-full text-xs h-8"
+=======
+                                className="w-full sm:w-auto text-xs"
+>>>>>>> 0e5f83a9815df6baca7c6dcdad7d7dc972318a22
                                 onClick={() => navigate(`/complaint/${complaint.id}`)}
                               >
                                 View Details
                               </Button>
                             </div>
 
+<<<<<<< HEAD
                             {/* Timestamp */}
                             <p className="text-xs text-muted-foreground pt-1">
                               {format(new Date(complaint.created_at), "MMM d, yyyy 'at' h:mm a")}
                             </p>
+=======
+                            <span className="text-xs sm:text-sm text-muted-foreground w-full sm:w-auto sm:ml-auto text-left sm:text-right mt-2 sm:mt-0">
+                              {format(new Date(complaint.created_at), "MMM d, yyyy")}
+                            </span>
+>>>>>>> 0e5f83a9815df6baca7c6dcdad7d7dc972318a22
                           </div>
                         </CardContent>
                       </Card>

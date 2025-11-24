@@ -25,35 +25,38 @@ export default function Index() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Navigation Bar */}
       <nav className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-4 sm:gap-8">
               <Link to="/" className="flex items-center gap-2">
-                <Shield className="w-6 h-6 text-primary" />
-                <span className="text-xl font-bold text-primary">CityServe</span>
+                <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                <span className="text-base sm:text-xl font-bold text-primary">CityServe</span>
               </Link>
-              <div className="hidden md:flex gap-6">
+              <div className="hidden md:flex gap-4 lg:gap-6">
                 <Link to="/" className="text-sm hover:text-primary transition-colors">Home</Link>
                 <Link to="/about" className="text-sm hover:text-primary transition-colors">About</Link>
                 <Link to="/track" className="text-sm hover:text-primary transition-colors">Track</Link>
                 <Link to="/departments" className="text-sm hover:text-primary transition-colors">Departments</Link>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 sm:gap-2">
               <ThemeToggle />
               {user ? (
                 <>
-                  <Button variant="ghost" size="sm" onClick={() => navigate("/settings")}>
-                    <Settings className="w-4 h-4 mr-2" />
-                    Settings
+                  <Button variant="ghost" size="sm" onClick={() => navigate("/settings")} className="hidden sm:flex">
+                    <Settings className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden lg:inline">Settings</span>
                   </Button>
                   <Button variant="outline" size="sm" onClick={handleSignOut}>
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
+                    <LogOut className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Sign Out</span>
                   </Button>
                 </>
               ) : (
-                <Button size="sm" onClick={() => navigate("/auth")}>Sign In</Button>
+                <Button size="sm" onClick={() => navigate("/auth")} className="text-xs sm:text-sm">
+                  <span className="hidden sm:inline">Sign In</span>
+                  <span className="sm:hidden">Login</span>
+                </Button>
               )}
             </div>
           </div>
@@ -62,28 +65,28 @@ export default function Index() {
 
       {/* Hero Section */}
       <div className="border-b bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="flex justify-between items-start mb-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-12">
+          <div className="flex justify-between items-start mb-6 sm:mb-8">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
-                  <Shield className="w-6 h-6 text-primary" />
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+                  <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
                     CityServe
                   </h1>
-                  <p className="text-sm text-muted-foreground">Empowering Citizens, Improving Cities</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Empowering Citizens, Improving Cities</p>
                 </div>
               </div>
-              <p className="text-lg text-muted-foreground max-w-2xl">
+              <p className="text-sm sm:text-base lg:text-lg text-muted-foreground max-w-2xl">
                 Your voice matters. Report civic issues, track their resolution, and help build a better community together.
               </p>
             </div>
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8">
             <Card className="border-primary/20">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">

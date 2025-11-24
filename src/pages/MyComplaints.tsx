@@ -70,20 +70,21 @@ export default function MyComplaints() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-5xl mx-auto py-8">
+    <div className="min-h-screen bg-background p-3 sm:p-4">
+      <div className="max-w-5xl mx-auto py-4 sm:py-8">
         <Button
           variant="ghost"
           onClick={() => navigate("/")}
-          className="mb-6"
+          className="mb-4 sm:mb-6"
+          size="sm"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">My Complaints</h1>
-          <p className="text-muted-foreground">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">My Complaints</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Track the status of your submitted complaints
           </p>
         </div>
@@ -103,24 +104,24 @@ export default function MyComplaints() {
           <div className="space-y-4">
             {complaints.map((complaint) => (
               <Card key={complaint.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
+                <CardHeader className="pb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                     <div className="space-y-1 flex-1">
-                      <CardTitle className="text-xl">{complaint.title}</CardTitle>
-                      <CardDescription>
-                        ID: {complaint.id}
+                      <CardTitle className="text-base sm:text-xl">{complaint.title}</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">
+                        ID: {complaint.id.slice(0, 8)}...
                       </CardDescription>
                     </div>
-                    <Badge className={statusColors[complaint.status as keyof typeof statusColors]}>
+                    <Badge className={`${statusColors[complaint.status as keyof typeof statusColors]} text-xs whitespace-nowrap`}>
                       {complaint.status.replace("_", " ").toUpperCase()}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 line-clamp-2">
                     {complaint.description}
                   </p>
-                  <div className="flex items-center justify-between text-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs sm:text-sm">
                     <div className="space-y-1">
                       <p className="text-muted-foreground">
                         <span className="font-medium">Category:</span>{" "}
@@ -134,10 +135,11 @@ export default function MyComplaints() {
                     <Button 
                       variant="outline" 
                       size="sm"
+                      className="w-full sm:w-auto text-xs"
                       onClick={() => navigate(`/complaint/${complaint.id}`)}
                     >
                       View Details
-                      <ExternalLink className="w-4 h-4 ml-2" />
+                      <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 ml-2" />
                     </Button>
                   </div>
                 </CardContent>
