@@ -9,15 +9,33 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { 
-      status: 200,
+      status: 204, 
       headers: corsHeaders 
     });
   }
 
   try {
-    const { messages } = await req.json();
+    // Parse request body with error handling
+    let body;
+    try {
+      const text = await req.text();
+      body = JSON.parse(text);
+    } catch (parseError) {
+      console.error("Failed to parse request body:", parseError);
+      throw new Error("Invalid JSON in request body");
+    }
+
+    const { messages } = body;
+    
+    if (!messages || !Array.isArray(messages)) {
+      throw new Error("Messages array is required");
+    }
+
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
+    
+    if (!GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not configured");
+    }
 
     const systemPrompt = `You are CityServe Assistant, an AI helper for a civic complaint management portal.
 
@@ -41,48 +59,64 @@ GUIDELINES:
 
 Answer user queries related to this complaint portal system.`;
 
+    // Prepare contents array for Gemini API
+    const contents = [
+      { role: "user", parts: [{ text: systemPrompt }] },
+      ...messages.map((msg: any) => ({
+        role: msg.role === "assistant" ? "model" : "user",
+        parts: [{ text: msg.content }]
+      }))
+    ];
+
+    // Call Gemini 2.5 Flash REST API directly
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [
-            { role: "user", parts: [{ text: systemPrompt }] },
-            ...messages.map((msg: any) => ({
-              role: msg.role === "assistant" ? "model" : "user",
-              parts: [{ text: msg.content }]
-            }))
-          ],
+          contents,
           generationConfig: {
             temperature: 0.7,
             topK: 40,
             topP: 0.95,
             maxOutputTokens: 1024,
-          }
+          },
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_HARASSMENT",
+              threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            }
+          ]
         }),
       }
     );
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Gemini API error:", response.status, errorText);
-      return new Response(JSON.stringify({ error: "AI service error" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      const error = await response.text();
+      console.error("Gemini API error:", error);
+      throw new Error(`Gemini API error: ${response.status}`);
     }
 
+    // Forward the stream from Gemini with CORS headers
     return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      headers: { 
+        ...corsHeaders, 
+        "Content-Type": "text/plain; charset=utf-8" 
+      },
     });
+
   } catch (e) {
     console.error("chat error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ 
+        error: e instanceof Error ? e.message : "Unknown error",
+        details: e instanceof Error ? e.stack : undefined
+      }), 
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 });

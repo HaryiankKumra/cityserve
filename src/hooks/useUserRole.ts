@@ -17,19 +17,24 @@ export function useUserRole() {
     }
 
     const fetchRole = async () => {
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .single();
+      if (!user.id) return;
 
-      if (error) {
+      try {
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Error fetching role:", error);
+          return;
+        }
+
+        setRole(data?.role || "citizen");
+      } catch (error) {
         console.error("Error fetching role:", error);
-        setRole("citizen"); // Default to citizen
-      } else {
-        setRole(data?.role as AppRole);
       }
-      setLoading(false);
     };
 
     fetchRole();

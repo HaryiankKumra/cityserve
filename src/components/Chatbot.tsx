@@ -26,13 +26,15 @@ export function Chatbot() {
   );
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
+    scrollToBottom();
+  }, [messages, isTyping]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -49,30 +51,53 @@ export function Chatbot() {
     setIsTyping(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-assistant`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          "apikey": import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ 
-          messages: [...messages, userMessage].map(m => ({
-            role: m.sender === "user" ? "user" : "assistant",
-            content: m.text
-          }))
-        }),
-      });
+      // IMPORTANT: This is insecure and exposes your API key on the client-side.
+      // This should only be used for local testing and never in production.
+      const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!GEMINI_API_KEY) {
+        throw new Error("VITE_GEMINI_API_KEY is not configured in your .env file.");
+      }
 
-      if (!response.ok || !response.body) throw new Error("Failed to get response");
+      const systemPrompt = `You are CityServe Assistant, an AI helper for a civic complaint management portal. Your capabilities include guiding users on filing/tracking complaints, explaining department roles, and assisting with portal features. Be helpful, concise, and stay within the context of civic complaint management.`;
+
+      const history = [...messages, userMessage].map(m => ({
+        role: m.sender === "user" ? "user" : "assistant",
+        content: m.text
+      }));
+
+      const contents = [
+        { role: "user", parts: [{ text: systemPrompt }] },
+        ...history.map((msg) => ({
+          role: msg.role === "assistant" ? "model" : "user",
+          parts: [{ text: msg.content }]
+        }))
+      ];
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents,
+            generationConfig: {
+              temperature: 0.7,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 1024,
+            },
+          }),
+        }
+      );
+
+      if (!response.ok || !response.body) throw new Error("Failed to get response from Gemini API");
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let textBuffer = "";
-      let streamDone = false;
       let assistantText = "";
 
-      // Create assistant message placeholder
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: "",
@@ -81,42 +106,34 @@ export function Chatbot() {
       };
       setMessages((prev) => [...prev, assistantMessage]);
 
-      while (!streamDone) {
+      while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        textBuffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
-
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
-
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") {
-            streamDone = true;
-            break;
-          }
-
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.candidates?.[0]?.content?.parts?.[0]?.text as string | undefined;
-            if (content) {
-              assistantText += content;
-              setMessages((prev) => 
-                prev.map((m) => 
-                  m.id === assistantMessage.id 
-                    ? { ...m, text: assistantText }
-                    : m
-                )
-              );
+        
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n').filter(line => line.trim());
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const jsonStr = line.slice(6);
+            if (jsonStr === '[DONE]') continue;
+            
+            try {
+              const parsed = JSON.parse(jsonStr);
+              const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text) {
+                assistantText += text;
+                setMessages((prev) => 
+                  prev.map((m) => 
+                    m.id === assistantMessage.id 
+                      ? { ...m, text: assistantText }
+                      : m
+                  )
+                );
+              }
+            } catch (parseError) {
+              console.error("Parse error:", parseError);
             }
-          } catch {
-            textBuffer = line + "\n" + textBuffer;
-            break;
           }
         }
       }
@@ -170,7 +187,7 @@ export function Chatbot() {
           </div>
 
           {/* Messages */}
-          <ScrollArea className="flex-1 p-3 sm:p-4" ref={scrollRef}>
+          <ScrollArea className="flex-1 p-3 sm:p-4">
             <div className="space-y-3 sm:space-y-4">
               {messages.map((message) => (
                 <div
@@ -206,6 +223,7 @@ export function Chatbot() {
                   </div>
                 </div>
               )}
+              <div ref={messagesEndRef} />
             </div>
           </ScrollArea>
 
