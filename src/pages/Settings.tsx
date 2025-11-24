@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +30,7 @@ export default function Settings() {
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
   const navigate = useNavigate();
+  useSessionTimeout();
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [allUsers, setAllUsers] = useState<AllUserProfile[]>([]);

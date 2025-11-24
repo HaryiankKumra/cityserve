@@ -56,12 +56,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       password
     });
+    if (!error) {
+      navigate("/dashboard");
+    }
     return { error };
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    navigate("/auth");
+    navigate("/");
   };
 
   return (
