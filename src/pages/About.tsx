@@ -52,7 +52,7 @@ const About = () => {
 
     const { data: complaints } = await supabase
       .from('complaints')
-      .select('department_id, status, departments(name)')
+      .select('assigned_department_id, status, departments(name)')
       .eq('status', 'resolved')
       .gte('updated_at', startDate.toISOString());
 
