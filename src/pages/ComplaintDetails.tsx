@@ -152,10 +152,17 @@ export default function ComplaintDetails() {
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div>
-              <h3 className="text-sm font-semibold mb-2">Description</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{complaint.description}</p>
-            </div>
+            {/* Description Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base sm:text-lg">Description</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm sm:text-base text-muted-foreground whitespace-pre-wrap break-words leading-relaxed">
+                  {complaint.description}
+                </p>
+              </CardContent>
+            </Card>
 
             <Separator />
 
