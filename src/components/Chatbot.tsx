@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, X, Send, Phone } from "lucide-react";
 
 interface Message {
-  id: number;
+  id: string;
   text: string;
   sender: "user" | "bot";
   timestamp: Date;
@@ -14,56 +14,82 @@ interface Message {
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      text: "Welcome to CityServe Portal! 🏛️ I can help you:\n\n• Submit a new complaint\n• Check complaint status\n• Contact registered departments\n\nHow can I assist you today?",
-      sender: "bot",
-      timestamp: new Date(),
-    },
-  ]);
-  const [inputValue, setInputValue] = useState("");
+  const [messages, setMessages] = useState<Message[]>(
+    [
+      {
+        id: "1",
+        text: "Hello! I'm CityServe Assistant. How can I help you today?",
+        sender: "bot",
+        timestamp: new Date(),
+      },
+    ]
+  );
+  const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = () => {
-    if (!inputValue.trim()) return;
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
 
     const userMessage: Message = {
-      id: messages.length + 1,
-      text: inputValue,
+      id: Date.now().toString(),
+      text: input,
       sender: "user",
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsTyping(true);
 
-    // Simple bot responses
     setTimeout(() => {
-      let botResponse = "";
-      const lowerInput = inputValue.toLowerCase();
-
-      if (lowerInput.includes("status") || lowerInput.includes("track")) {
-        botResponse = "To check your complaint status, please visit the Track Complaint page or provide your complaint ID. You can also view all your complaints in the My Complaints section.";
-      } else if (lowerInput.includes("submit") || lowerInput.includes("new") || lowerInput.includes("complaint")) {
-        botResponse = "To submit a new complaint, click on 'Submit Complaint' in the navigation menu. You'll need to provide details about the issue, location, and category.";
-      } else if (lowerInput.includes("contact") || lowerInput.includes("phone") || lowerInput.includes("call")) {
-        botResponse = "You can reach us at:\n📞 +91 98765 43210\n📧 support@cityserve.in\n\nOur team is available 24/7 to assist you.";
-      } else if (lowerInput.includes("hello") || lowerInput.includes("hi")) {
-        botResponse = "Hello! How can I help you with CityServe today?";
-      } else {
-        botResponse = "I can help you with:\n• Submitting complaints\n• Checking complaint status\n• Contacting departments\n\nPlease let me know what you need assistance with.";
-      }
-
+      const botResponse = generateResponse(input.toLowerCase());
       const botMessage: Message = {
-        id: messages.length + 2,
+        id: (Date.now() + 1).toString(),
         text: botResponse,
         sender: "bot",
         timestamp: new Date(),
       };
-
       setMessages((prev) => [...prev, botMessage]);
-    }, 500);
+      setIsTyping(false);
+    }, 1000);
+  };
 
-    setInputValue("");
+  const generateResponse = (query: string): string => {
+    if (query.includes("track") || query.includes("complaint")) {
+      return "To track your complaint, visit the Track page and enter your complaint ID. You can also view all your complaints in 'My Complaints'.";
+    }
+    if (query.includes("submit") || query.includes("file") || query.includes("report")) {
+      return "To submit a complaint, click 'Submit Complaint' on the homepage. You'll need to provide details, location, and optionally upload photos.";
+    }
+    if (query.includes("status") || query.includes("progress")) {
+      return "Check complaint status in 'My Complaints'. Statuses include: New, In Progress, Resolved, and Closed with real-time updates.";
+    }
+    if (query.includes("department")) {
+      return "Complaints are automatically assigned to relevant departments. View all departments and their work on the Departments page.";
+    }
+    if (query.includes("help") || query.includes("support")) {
+      return "I can help with: filing complaints, tracking complaints, understanding status, department info, and platform guidance. What would you like to know?";
+    }
+    if (query.includes("login") || query.includes("account")) {
+      return "To access all features, sign in or create an account. Click 'Sign In' in the navigation menu.";
+    }
+    if (query.includes("priority") || query.includes("urgent")) {
+      return "Priority is determined by admins based on severity. Critical issues like safety hazards are prioritized.";
+    }
+    if (query.includes("photo") || query.includes("image")) {
+      return "Upload photos when submitting complaints for visual evidence. Supported: JPG, PNG. Max: 5MB per image.";
+    }
+    if (query.includes("location") || query.includes("address")) {
+      return "Select location on the map or enter address manually when filing. Accurate location helps faster response.";
+    }
+    return "I'm here to help! Ask about filing complaints, tracking them, department info, or platform features.";
   };
 
   return (
@@ -72,113 +98,90 @@ export function Chatbot() {
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 z-50"
+          className="fixed bottom-4 right-4 h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-lg z-50"
           size="icon"
         >
-          <MessageCircle className="h-6 w-6" />
+          <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" />
         </Button>
       )}
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 w-96 h-[500px] shadow-2xl z-50 flex flex-col animate-scale-in">
+        <Card className="fixed bottom-4 right-4 w-[calc(100vw-2rem)] sm:w-[380px] h-[500px] sm:h-[600px] shadow-2xl z-50 flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
+          <div className="flex items-center justify-between p-3 sm:p-4 border-b bg-primary/5">
             <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              <div>
-                <h3 className="font-semibold">CityServe Assistant</h3>
-                <p className="text-xs opacity-90">Always here to help</p>
-              </div>
+              <MessageCircle className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-sm sm:text-base">
+                CityServe Assistant
+              </h3>
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(false)}
-              className="hover:bg-primary-foreground/10"
+              className="h-8 w-8"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
 
           {/* Messages */}
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
+          <ScrollArea className="flex-1 p-3 sm:p-4" ref={scrollRef}>
+            <div className="space-y-3 sm:space-y-4">
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                  className={`flex ${
+                    message.sender === "user" ? "justify-end" : "justify-start"
+                  }`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-lg p-3 ${
+                    className={`max-w-[85%] sm:max-w-[80%] rounded-lg p-2 sm:p-3 ${
                       message.sender === "user"
                         ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground"
+                        : "bg-muted"
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-line">{message.text}</p>
-                    <p className="text-xs opacity-70 mt-1">
+                    <p className="text-xs sm:text-sm break-words">
+                      {message.text}
+                    </p>
+                    <span className="text-[10px] opacity-70 mt-1 block">
                       {message.timestamp.toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
-                    </p>
+                    </span>
                   </div>
                 </div>
               ))}
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="bg-muted rounded-lg p-3 flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-xs sm:text-sm">Typing...</span>
+                  </div>
+                </div>
+              )}
             </div>
           </ScrollArea>
 
-          {/* Quick Actions */}
-          <div className="p-2 border-t bg-muted/30">
-            <div className="flex gap-2 mb-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs"
-                onClick={() => {
-                  setInputValue("How do I submit a complaint?");
-                  handleSend();
-                }}
-              >
-                Submit Complaint
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs"
-                onClick={() => {
-                  setInputValue("Check complaint status");
-                  handleSend();
-                }}
-              >
-                Check Status
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs"
-                onClick={() => {
-                  setInputValue("Contact number");
-                  handleSend();
-                }}
-              >
-                <Phone className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-
           {/* Input */}
-          <div className="p-4 border-t">
+          <div className="p-3 sm:p-4 border-t">
             <div className="flex gap-2">
               <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSend()}
                 placeholder="Type your message..."
-                className="flex-1"
+                className="flex-1 text-sm"
+                disabled={isTyping}
               />
-              <Button onClick={handleSend} size="icon">
+              <Button
+                onClick={handleSend}
+                size="icon"
+                disabled={!input.trim() || isTyping}
+              >
                 <Send className="h-4 w-4" />
               </Button>
             </div>
