@@ -6,7 +6,12 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response(null, { 
+      status: 200,
+      headers: corsHeaders 
+    });
+  }
 
   try {
     const { messages } = await req.json();

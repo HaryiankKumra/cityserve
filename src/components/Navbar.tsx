@@ -1,13 +1,22 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, Info, FileText, LogIn, Moon, Sun, Menu, MapPin, Building2 } from "lucide-react";
+import { Home, Info, FileText, LogIn, LogOut, Moon, Sun, Menu, MapPin, Building2, User } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    setOpen(false);
+    navigate("/");
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -50,12 +59,27 @@ const Navbar = () => {
               Submit
             </Button>
           </Link>
-          <Link to="/auth">
-            <Button variant="default" size="sm">
-              <LogIn className="mr-2 h-4 w-4" />
-              Login
-            </Button>
-          </Link>
+          {user ? (
+            <>
+              <Link to="/dashboard">
+                <Button variant="ghost" size="sm">
+                  <User className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Button variant="default" size="sm" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+            </>
+          ) : (
+            <Link to="/auth">
+              <Button variant="default" size="sm">
+                <LogIn className="mr-2 h-4 w-4" />
+                Login
+              </Button>
+            </Link>
+          )}
           <Button
             variant="ghost"
             size="sm"
@@ -113,12 +137,31 @@ const Navbar = () => {
                     Submit
                   </Button>
                 </Link>
-                <Link to="/auth" onClick={() => setOpen(false)}>
-                  <Button className="w-full justify-start" size="lg">
-                    <LogIn className="mr-2 h-5 w-5" />
-                    Login
-                  </Button>
-                </Link>
+                {user ? (
+                  <>
+                    <Link to="/dashboard" onClick={() => setOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start" size="lg">
+                        <User className="mr-2 h-5 w-5" />
+                        Dashboard
+                      </Button>
+                    </Link>
+                    <Button 
+                      className="w-full justify-start" 
+                      size="lg"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="mr-2 h-5 w-5" />
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <Link to="/auth" onClick={() => setOpen(false)}>
+                    <Button className="w-full justify-start" size="lg">
+                      <LogIn className="mr-2 h-5 w-5" />
+                      Login
+                    </Button>
+                  </Link>
+                )}
               </div>
             </SheetContent>
           </Sheet>
