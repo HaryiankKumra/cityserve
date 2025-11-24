@@ -21,6 +21,18 @@ export default function Auth() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Handle OAuth callback
+    const handleOAuthCallback = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/dashboard");
+      }
+    };
+
+    handleOAuthCallback();
+  }, [navigate]);
+
+  useEffect(() => {
     if (user) {
       navigate("/dashboard");
     }
@@ -100,11 +112,16 @@ export default function Auth() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${window.location.origin}/auth`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
       },
     });
 
     if (error) {
+      console.error('Google Sign-In Error:', error);
       toast.error(error.message);
       setLoading(false);
     }
