@@ -6,18 +6,20 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import { Chatbot } from "@/components/Chatbot";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   FileText,
   Search,
   BarChart3,
   Building2,
   Settings,
-  LogOut,
+  Shield,
 } from "lucide-react";
 
 export default function Dashboard() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const { isAdmin } = useUserRole();
   useSessionTimeout();
 
   useEffect(() => {
@@ -73,6 +75,18 @@ export default function Dashboard() {
     },
   ];
 
+  const adminActions = isAdmin ? [
+    {
+      title: "Admin Dashboard",
+      description: "Manage system and complaints",
+      icon: <Shield className="h-8 w-8" />,
+      onClick: () => navigate("/admin"),
+      color: "text-red-500",
+    },
+  ] : [];
+
+  const allActions = [...quickActions, ...adminActions];
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -83,7 +97,7 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {quickActions.map((action, index) => (
+          {allActions.map((action, index) => (
             <Card 
               key={index} 
               className="hover:shadow-lg transition-shadow cursor-pointer"
