@@ -1,11 +1,14 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+const THROTTLE_DELAY = 5000; // Only reset timeout every 5 seconds
 
 export function useSessionTimeout() {
   const { signOut, user } = useAuth();
+  const lastActivityRef = useRef<number>(Date.now());
+  const timeoutIdRef = useRef<NodeJS.Timeout>();
 
   const handleLogout = useCallback(async () => {
     toast.info("Your session has expired. Please sign in again.");
@@ -15,25 +18,32 @@ export function useSessionTimeout() {
   useEffect(() => {
     if (!user) return;
 
-    let timeoutId: NodeJS.Timeout;
-
     const resetTimeout = () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(handleLogout, SESSION_TIMEOUT);
+      const now = Date.now();
+      
+      // Throttle: only reset if enough time has passed since last activity
+      if (now - lastActivityRef.current < THROTTLE_DELAY) {
+        return;
+      }
+      
+      lastActivityRef.current = now;
+      
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = setTimeout(handleLogout, SESSION_TIMEOUT);
     };
 
-    // Activity events that reset the timer
-    const events = ["mousedown", "keydown", "scroll", "touchstart", "click"];
+    // Reduce to fewer, more meaningful events
+    const events = ["mousedown", "keydown"];
 
     events.forEach((event) => {
-      window.addEventListener(event, resetTimeout);
+      window.addEventListener(event, resetTimeout, { passive: true });
     });
 
     // Initial timeout
     resetTimeout();
 
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
       events.forEach((event) => {
         window.removeEventListener(event, resetTimeout);
       });
