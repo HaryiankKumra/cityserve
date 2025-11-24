@@ -17,7 +17,10 @@ export function useUserRole() {
     }
 
     const fetchRole = async () => {
-      if (!user.id) return;
+      if (!user.id) {
+        setLoading(false);
+        return;
+      }
 
       try {
         const { data, error } = await supabase
@@ -28,12 +31,15 @@ export function useUserRole() {
 
         if (error) {
           console.error("Error fetching role:", error);
+          setLoading(false);
           return;
         }
 
         setRole(data?.role || "citizen");
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching role:", error);
+        setLoading(false);
       }
     };
 
