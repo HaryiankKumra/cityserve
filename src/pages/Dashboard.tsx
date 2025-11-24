@@ -90,7 +90,7 @@ export default function Dashboard() {
       title: "Moderator Portal",
       description: "Review and manage complaints",
       icon: <Shield className="h-8 w-8" />,
-      onClick: () => navigate("/department-portal"),
+      onClick: () => navigate("/departments"),
       color: "text-blue-500",
     },
   ] : [];
