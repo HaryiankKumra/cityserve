@@ -7,7 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 
 // Page imports - All application pages
-import Index from "./pages/Index";
+import Landing from "./pages/Landing";
+import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import ComplaintForm from "./pages/ComplaintForm";
 import MyComplaints from "./pages/MyComplaints";
@@ -30,7 +31,8 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Landing />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/submit" element={<ComplaintForm />} />
               <Route path="/my-complaints" element={<MyComplaints />} />

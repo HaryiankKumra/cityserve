@@ -48,48 +48,90 @@ export function Chatbot() {
     setInput("");
     setIsTyping(true);
 
-    setTimeout(() => {
-      const botResponse = generateResponse(input.toLowerCase());
-      const botMessage: Message = {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-assistant`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ 
+          messages: [...messages, userMessage].map(m => ({
+            role: m.sender === "user" ? "user" : "assistant",
+            content: m.text
+          }))
+        }),
+      });
+
+      if (!response.ok || !response.body) throw new Error("Failed to get response");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+      let streamDone = false;
+      let assistantText = "";
+
+      // Create assistant message placeholder
+      const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: botResponse,
+        text: "",
         sender: "bot",
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, botMessage]);
-      setIsTyping(false);
-    }, 1000);
-  };
+      setMessages((prev) => [...prev, assistantMessage]);
 
-  const generateResponse = (query: string): string => {
-    if (query.includes("track") || query.includes("complaint")) {
-      return "To track your complaint, visit the Track page and enter your complaint ID. You can also view all your complaints in 'My Complaints'.";
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") {
+            streamDone = true;
+            break;
+          }
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) {
+              assistantText += content;
+              setMessages((prev) => 
+                prev.map((m) => 
+                  m.id === assistantMessage.id 
+                    ? { ...m, text: assistantText }
+                    : m
+                )
+              );
+            }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
+
+      setIsTyping(false);
+    } catch (error) {
+      console.error("Error:", error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "Sorry, I'm having trouble connecting. Please try again.",
+        sender: "bot",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+      setIsTyping(false);
     }
-    if (query.includes("submit") || query.includes("file") || query.includes("report")) {
-      return "To submit a complaint, click 'Submit Complaint' on the homepage. You'll need to provide details, location, and optionally upload photos.";
-    }
-    if (query.includes("status") || query.includes("progress")) {
-      return "Check complaint status in 'My Complaints'. Statuses include: New, In Progress, Resolved, and Closed with real-time updates.";
-    }
-    if (query.includes("department")) {
-      return "Complaints are automatically assigned to relevant departments. View all departments and their work on the Departments page.";
-    }
-    if (query.includes("help") || query.includes("support")) {
-      return "I can help with: filing complaints, tracking complaints, understanding status, department info, and platform guidance. What would you like to know?";
-    }
-    if (query.includes("login") || query.includes("account")) {
-      return "To access all features, sign in or create an account. Click 'Sign In' in the navigation menu.";
-    }
-    if (query.includes("priority") || query.includes("urgent")) {
-      return "Priority is determined by admins based on severity. Critical issues like safety hazards are prioritized.";
-    }
-    if (query.includes("photo") || query.includes("image")) {
-      return "Upload photos when submitting complaints for visual evidence. Supported: JPG, PNG. Max: 5MB per image.";
-    }
-    if (query.includes("location") || query.includes("address")) {
-      return "Select location on the map or enter address manually when filing. Accurate location helps faster response.";
-    }
-    return "I'm here to help! Ask about filing complaints, tracking them, department info, or platform features.";
   };
 
   return (
