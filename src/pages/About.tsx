@@ -77,7 +77,7 @@ const About = () => {
   const team = [
     { name: "Haryiank Kumra", role: "City Manager", image: "/haryiank.jpg" },
     { name: "Naman Bansal", role: "Operations Head", image: "https://media.licdn.com/dms/image/v2/D5603AQHwsMvymBxX9g/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1728845303855?e=1765411200&v=beta&t=kEveRsWHtUOqwUSpGI5GaOzy3-ORDc7v87QpL6xGW1A" },
-    { name: "Manjot Kaur", role: "Tech Lead", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" },
+    { name: "Manjot Kaur", role: "Tech Lead", image: "/WhatsApp Image 2025-11-28 at 00.00.02_4e58ae97.jpg" },
     { name: "Bhaumik Verma", role: "Public Relations", image: "/bhaumik.jpg" },
   ];
 
