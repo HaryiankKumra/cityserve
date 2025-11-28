@@ -17,26 +17,30 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const { signUp, signIn, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Handle OAuth callback
-    const handleOAuthCallback = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+    // Listen for password recovery event
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsPasswordRecovery(true);
+      } else if (event === 'SIGNED_IN' && !isPasswordRecovery) {
         navigate("/dashboard");
       }
-    };
+    });
 
-    handleOAuthCallback();
-  }, [navigate]);
+    return () => subscription.unsubscribe();
+  }, [navigate, isPasswordRecovery]);
 
   useEffect(() => {
-    if (user) {
+    if (user && !isPasswordRecovery) {
       navigate("/dashboard");
     }
-  }, [user, navigate]);
+  }, [user, navigate, isPasswordRecovery]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,6 +111,36 @@ export default function Auth() {
     setLoading(false);
   };
 
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Password updated successfully!");
+      setIsPasswordRecovery(false);
+      setNewPassword("");
+      setConfirmPassword("");
+      navigate("/dashboard");
+    }
+    setLoading(false);
+  };
+
   const handleGoogleSignIn = async () => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
@@ -162,17 +196,60 @@ export default function Auth() {
             <Building2 className="w-8 h-8 text-primary-foreground" />
           </div>
           <CardTitle className="text-3xl font-bold">
-            {showForgotPassword ? "Reset Password" : "CityServe"}
+            {isPasswordRecovery ? "Set New Password" : showForgotPassword ? "Reset Password" : "CityServe"}
           </CardTitle>
           <CardDescription>
-            {showForgotPassword 
-              ? "Enter your email to receive a password reset link"
-              : "Report and track civic complaints"
+            {isPasswordRecovery
+              ? "Enter your new password below"
+              : showForgotPassword 
+                ? "Enter your email to receive a password reset link"
+                : "Report and track civic complaints"
             }
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {showForgotPassword ? (
+          {isPasswordRecovery ? (
+            <form onSubmit={handlePasswordUpdate} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="pl-10"
+                    required
+                    minLength={6}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pl-10"
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Must be at least 6 characters
+                </p>
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Updating..." : "Update Password"}
+              </Button>
+            </form>
+          ) : showForgotPassword ? (
             <form onSubmit={handleForgotPassword} className="space-y-4 mt-4">
               <div className="space-y-2">
                 <Label htmlFor="reset-email">Email</Label>
