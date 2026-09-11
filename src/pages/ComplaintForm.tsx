@@ -112,8 +112,7 @@ export default function ComplaintForm() {
   useEffect(() => { if (!user) navigate("/auth"); }, [user, navigate]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []).filter(f => f.size <= 10485760 && f.type.startsWith("image/")).slice(0, 5);
-    setImages(prev => [...prev, ...files].slice(0, 5));
+    const files = Array.from(e.target.files || []).slice(0, 5);
     files.forEach(f => { const r = new FileReader(); r.onloadend = () => setImagePreviews(p => [...p, r.result as string]); r.readAsDataURL(f); });
   };
 
