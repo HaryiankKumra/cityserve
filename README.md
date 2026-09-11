@@ -49,3 +49,5 @@ The application will be available at `http://localhost:8080`
 - **Leaflet** - Maps integration
 
 ## Project Structure
+
+Testing DevPilot GitHub review
